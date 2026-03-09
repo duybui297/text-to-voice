@@ -65,6 +65,31 @@ header p {
     font-size: 1.1rem;
 }
 
+.input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.input-header label {
+    margin-bottom: 0;
+}
+
+.upload-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+}
+
+.upload-btn:hover:not(:disabled) {
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateY(-1px);
+}
+
 .input-group {
     margin-bottom: 24px;
 }

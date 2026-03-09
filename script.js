@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pauseBtn = document.getElementById('pause-btn');
     const stopBtn = document.getElementById('stop-btn');
     const downloadBtn = document.getElementById('download-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
     const statusText = document.getElementById('status-text');
     const pulse = document.querySelector('.pulse');
 
@@ -186,6 +188,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Open the audio in a new tab where user can right click -> save as, or download directly.
         window.open(url, '_blank');
+    });
+
+    // Handle File Upload
+    uploadBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const fileName = file.name.toLowerCase();
+
+        // Show loading status
+        updateUIState('loading');
+        statusText.textContent = 'Reading file...';
+
+        if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+            // Read standard text files
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                textInput.value = e.target.result;
+                updateUIState('stopped');
+                statusText.textContent = 'File loaded successfully!';
+                setTimeout(() => updateUIState('stopped'), 2000); // Reset to Ready
+            };
+            reader.onerror = () => {
+                alert('Có lỗi xảy ra khi đọc file text.');
+                updateUIState('stopped');
+            };
+            reader.readAsText(file);
+        } else if (fileName.endsWith('.docx')) {
+            // Read Word documents using mammoth
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const arrayBuffer = e.target.result;
+                mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                    .then((result) => {
+                        textInput.value = result.value;
+                        updateUIState('stopped');
+                        statusText.textContent = 'Word document loaded!';
+                        setTimeout(() => updateUIState('stopped'), 2000);
+                    })
+                    .catch((err) => {
+                        console.error('Error reading DOCX:', err);
+                        alert('Không thể đọc nội dung file DOCX. Hãy chắc chắn file không bị lỗi hoặc đặt mật khẩu.');
+                        updateUIState('stopped');
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('Định dạng file không được hỗ trợ. Vui lòng chọn file .txt, .md hoặc .docx');
+            updateUIState('stopped');
+        }
+
+        // Reset input so the same file can be uploaded again if needed
+        fileInput.value = '';
     });
 
     window.addEventListener('beforeunload', () => {
